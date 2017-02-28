@@ -1,10 +1,1 @@
-{
-  "results": [{
-    "createdAt": "",
-    "text": "Hello, World!",
-    "roomname": "lobby",
-    "username": "AllenLe2.0",
-    "objectId": "",
-    "updatedAt": ""
-  }]
-}
+{"results":[{"createdAt":"","text":"Hello, World!","roomname":"lobby","username":"AllenLe2.0","objectId":"","updatedAt":""},{"username":"TerrenceTMac","text":"Please work!","roomname":"lobby"}]}

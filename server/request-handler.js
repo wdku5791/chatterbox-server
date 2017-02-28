@@ -50,14 +50,9 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  // console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  var parsedUrl = url.parse(request.url);
+  console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
-  // console.log('Path name', parsedUrl.pathname);
-  // console.log('Query', parsedUrl.search);
-  // console.log('url', request.url);
-
-
+  // Default status code
   var statusCode = 404;
 
   var headers = defaultCorsHeaders;
@@ -83,8 +78,7 @@ var requestHandler = function(request, response) {
     } else if (request.method === 'OPTIONS') {
       statusCode = 200;
       response.writeHead(statusCode, headers);
-      console.log('Hello!');
-      console.log(response);
+
       response.end();
     } else if (request.method === 'POST') {
       
@@ -105,14 +99,29 @@ var requestHandler = function(request, response) {
         var newMessage = qs.parse(body);
 
         // Read the file
-        // Parse the file
-        // Push the messages array
-        // Stringify the object
-        // Overwrite the current file
-        // Send the response with the messages
+        fs.readFile('./data.json', function(err, contents) {
+          // Parse the file
+          var messages = JSON.parse(contents);
+          
+          console.log('Current Messages', messages);
+          
+          // Push the messages array
+          messages.results.push(newMessage);
 
-        response.writeHead(statusCode, headers); 
-        response.end(console.log('Hello world'));
+          // Stringify the object
+          var updatedMessages = JSON.stringify(messages);
+          console.log(updatedMessages);
+
+          // Overwrite the current file
+          fs.writeFile('./data.json', updatedMessages, err => {
+            if (err) {
+              throw err;
+            }
+            // Send the response with the messages
+            response.writeHead(statusCode, headers);  
+            response.end(JSON.stringify(messages));
+          });
+        });
       });
     }    
   }
