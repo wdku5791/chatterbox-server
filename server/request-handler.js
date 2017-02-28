@@ -32,8 +32,6 @@ this file and include it in basic-server.js so that it actually works.
 var url = require('url');
 var fs = require('fs');
 var qs = require('querystring');
-// var data = require('./data');
-console.log('Request Handler File');
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -45,12 +43,8 @@ var requestHandler = function(request, response) {
   // Documentation for both request and response can be found in the HTTP section at
   // http://nodejs.org/documentation/api/
 
-  // Do some basic logging.
-  //
-  // Adding more logging to your server can be an easy way to get passive
-  // debugging help, but you should always be careful about leaving stray
-  // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  var parsedUrl = url.parse(request.url);
 
   // Default status code
   var statusCode = 404;
@@ -70,9 +64,9 @@ var requestHandler = function(request, response) {
       // Read the messages
       fs.readFile('./data.json', function(err, contents) {
         var messages = JSON.parse(contents);
-        console.log('Current Messages', messages);
         
-        response.writeHead(statusCode, headers);  
+        response.writeHead(statusCode, headers);
+        console.log('GET REQUEST SENT');  
         response.end(JSON.stringify(messages));
       });
     } else if (request.method === 'OPTIONS') {
@@ -119,32 +113,13 @@ var requestHandler = function(request, response) {
             }
             // Send the response with the messages
             response.writeHead(statusCode, headers);  
+            console.log('POST REQUEST SENT');
             response.end(JSON.stringify(messages));
           });
         });
       });
     }    
   }
-
-  // console.log(statusCode);
-
-
-
-  // Craft Header
-  // Excuted before async code
-  // var headers = defaultCorsHeaders;
-  // headers['Content-Type'] = 'application/json';
-  // response.writeHead(statusCode, headers);
-
-  //response.end(console.log('Hello world'));
-
-  // fs.readFile('./data.json', function(err, contents) {
-  //   var messages = JSON.parse(contents);
-  //   console.log('Testing if message was pushed', messages.results);
-  //   console.log(messages, 1);
-  //   // console.log(newMessage);
-  //   response.end(JSON.stringify(messages));
-  // });
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -153,10 +128,8 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-
-
-  // response.end(JSON.stringify(data));
 };
 
 
 exports.requestHandler = requestHandler;
+
