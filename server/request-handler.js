@@ -50,83 +50,92 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  // console.log('Serving request type ' + request.method + ' for url ' + request.url);
   var parsedUrl = url.parse(request.url);
 
-  console.log('Path name', parsedUrl.pathname);
-  console.log('Query', parsedUrl.search);
-  console.log('url', request.url);
-  // HANDLING REQUEST
-  // var body = [];
-  // request.on('error', function(err) {
-  //   console.error(err);
-  // }).on('data', function(chunk) {
-  //   body.push(chunk);
-  // }).on('end', function() {
-  //   body = Buffer.concat(body).toString();
-  //   // At this point, we have the headers, method, url and body, and can now
-  //   // do whatever we need to in order to respond to this request.
-  // });
-
+  // console.log('Path name', parsedUrl.pathname);
+  // console.log('Query', parsedUrl.search);
+  // console.log('url', request.url);
 
 
   var statusCode = 404;
 
+  var headers = defaultCorsHeaders;
+  headers['Content-Type'] = 'application/json';
+  
   if (parsedUrl.pathname !== '/classes/messages') {
     statusCode = 404;
+    response.writeHead(statusCode);
+    response.end();
   } else {
     // The outgoing status.
     if (request.method === 'GET') {
-      statusCode = 200; 
+      statusCode = 200;
+      
+      // Read the messages
+      fs.readFile('./data.json', function(err, contents) {
+        var messages = JSON.parse(contents);
+        console.log('Current Messages', messages);
+        
+        response.writeHead(statusCode, headers);  
+        response.end(JSON.stringify(messages));
+      });
     } else if (request.method === 'OPTIONS') {
       statusCode = 200;
+      response.writeHead(statusCode, headers);
+      console.log('Hello!');
+      console.log(response);
+      response.end();
     } else if (request.method === 'POST') {
-      statusCode = 201;
+      
+      var body = [];
+      request.on('error', function(err) {
+        console.error(err);
+      }).on('data', function(chunk) {
+        body.push(chunk);
+      }).on('end', function() {
+
+        // Set successful status code
+        statusCode = 201;
+
+        // Get full body text
+        body = Buffer.concat(body).toString();
+        
+        // Parse it to a message object
+        var newMessage = qs.parse(body);
+
+        // Read the file
+        // Parse the file
+        // Push the messages array
+        // Stringify the object
+        // Overwrite the current file
+        // Send the response with the messages
+
+        response.writeHead(statusCode, headers); 
+        response.end(console.log('Hello world'));
+      });
     }    
   }
 
-  console.log(statusCode);
-
-  var body = [];
-  request.on('error', function(err) {
-    console.error(err);
-  }).on('data', function(chunk) {
-    body.push(chunk);
-  }).on('end', function() {
-    body = Buffer.concat(body).toString();
-    console.log('Body', body);
-    var newMessage = qs.parse(body);
-    console.log(newMessage);
-  });
+  // console.log(statusCode);
 
 
-  // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
 
-  // Tell the client we are sending them plain text.
-  //
-  // You will need to change this if you are sending something
-  // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'application/json';
+  // Craft Header
+  // Excuted before async code
+  // var headers = defaultCorsHeaders;
+  // headers['Content-Type'] = 'application/json';
+  // response.writeHead(statusCode, headers);
 
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  //response.end(console.log('Hello world'));
 
-  // var responseBody = {
-  //   headers: headers,
-  //   method: request.method,
-  //   url: request.url,
-  //   body: JSON.stringify(data)
-  // };
-
-  fs.readFile('./data.json', function(err, contents) {
-    var messages = JSON.parse(contents);
-    console.log('Testing if message was pushed', messages.results);
-    console.log(messages, 1);
-    // console.log(newMessage);
-    response.end(JSON.stringify(messages));
-  });
+  // fs.readFile('./data.json', function(err, contents) {
+  //   var messages = JSON.parse(contents);
+  //   console.log('Testing if message was pushed', messages.results);
+  //   console.log(messages, 1);
+  //   // console.log(newMessage);
+  //   response.end(JSON.stringify(messages));
+  // });
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -135,6 +144,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
+
 
   // response.end(JSON.stringify(data));
 };
