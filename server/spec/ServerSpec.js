@@ -1,6 +1,8 @@
 var handler = require('../request-handler');
 var expect = require('chai').expect;
 var stubs = require('./Stubs');
+var sinon = require('sinon');
+var fs = require('fs');
 
 // Conditional async testing, akin to Jasmine's waitsFor()
 // Will wait for test to be truthy before executing callback
@@ -23,12 +25,20 @@ describe('Node Server Request Listener Function', function() {
         expect(res._responseCode).to.equal(200);
         expect(res._ended).to.equal(true);
       });
+  });
 
+  it('Should answer OPTIONS requests for /classes/messages with a 200 status code', function() {
+    // This is a fake server request. Normally, the server would provide this,
+    // but we want to test our function's behavior totally independent of the server code
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
 
-    // handler.requestHandler(req, res);
-
-    // expect(res._responseCode).to.equal(200);
-    // expect(res._ended).to.equal(true);
+    waitForThen(
+      function() { handler.requestHandler(req, res); },
+      function() {
+        expect(res._responseCode).to.equal(200);
+        expect(res._ended).to.equal(true);
+      });
   });
 
   it('Should send back parsable stringified JSON', function() {
@@ -133,6 +143,28 @@ describe('Node Server Request Listener Function', function() {
       function() { return res._ended; },
       function() {
         expect(res._responseCode).to.equal(404);
+      });
+  });
+
+  xit('Should call fsWrite file once on POST requests', function(done) {
+    var stubMsg = {
+      username: 'Jono',
+      message: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    // Create spy
+    fsWriteSpy = sinon.spy(fs, 'writeFile');
+
+    waitForThen(
+      function() { 
+        console.log('1');
+        handler.requestHandler(req, res); 
+      },
+      function() {
+        console.log('2');
+        expect(fsWriteSpy.callCount).to.equal(0);
       });
   });
 
